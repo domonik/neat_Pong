@@ -14,12 +14,13 @@ import pygame
 import random
 import os
 import neat
+import pickle
 WIN_WIDTH = 1000  # pygame window width in pixels
 WIN_HEIGHT = 800  # pygame window height in pixels
 LEARNING_PARAM1 = 1  # reward for the AI for deflecting a ball
 LEARNING_PARAM2 = 0.001  # reward for the AI for holding its paddle at the same height as the ball
 MAX_FITNESS = 150  # maximum fitness threshold at which the AI is seen as perfect
-FPS = 500  # defines the number of FPS that pygame renders. This can be set very high to speed up training of the AI.
+FPS = 1000  # defines the number of FPS that pygame renders. This can be set very high to speed up training of the AI.
 
 # tuples of RGB values that are used a few times
 WHITE =     (255, 255, 255)
@@ -107,7 +108,7 @@ class Ball:
         ret_value = 0
         if player.side == "left":
             if player.y + player.height > self.y > player.y:
-                ret_value += LEARNING_PARAM2  # adds the same height learning parameter to the return value
+                ret_value += LEARNING_PARAM2  # adds the "same height" learning parameter to the return value
                 if (self.x + self.x_vel) - self.radius < 0 + player.width:
                     self.x_vel = -(self.x_vel + 0.5)  # speeds up the ball for every deflection
                     # adds some random deflection to prevent the ball from getting stuck at the same route
@@ -151,7 +152,7 @@ class Ball:
 #   score:      dictionary with keywords left and right and the corresponding points scored
 def draw_window(win, ball, bg, players, font, score):
     pygame.draw.rect(win, WHITE, bg, 0)
-    leftscore = font.render( "left:  " + str(score["left"]), False, (0, 0, 0))
+    leftscore = font.render("left:  " + str(score["left"]), False, (0, 0, 0))
     rightscore = font.render("right: " + str(score["right"]), False, (0, 0, 0))
     rightsize = rightscore.get_size()
     leftsize = leftscore.get_size()
@@ -162,14 +163,16 @@ def draw_window(win, ball, bg, players, font, score):
     ball.draw(win)
     pygame.display.update()
 
-# The main function of the game. It takes a list of genomes as well as a config object for these genomes.
+# The main game function. It takes a list of genomes as well as a config object for these genomes.
 # Both of them are provided by the neat pythons populations run function. For each genome a slightly altered neural
 # network is created based on the settings provided by the config object. Every genome object has a variable called
 # fitness. This fitness is a measure of how well the network performs in playing Pong. In this case the fitness is
 # increased if either the AI successfully deflects a ball or holds its paddle at the same height as the ball.
-# The Neural network has 3 ingoing values. Namely the y position of the paddle as well as the x and y position of the
+# The Neural network has 3 ingoing values. Namely, the y position of the paddle as well as the x and y position of the
 # ball. The output is a single node with an tanh activation function. As the functions values are between -1 and 1,
-# the AI moves the paddle up if the output value is higher than 0.5 or down if it is below -0.5.
+# the AI moves the paddle up, if the output value is higher than 0.5, or down if it is below -0.5. Training ends if the
+# AI reaches the MAX_FITNESS threshold. However, the training will continue until the current generation is finished.
+# Keep in mind that networks of the same generation might not perform equally well.
 def main(genomes, config):
     nets = []
     ge = []
@@ -180,7 +183,7 @@ def main(genomes, config):
         nets.append(net)
         ge.append(genome)
 
-    # playes Pong for each genome
+    # plays Pong for each genome
     for x, genome in enumerate(ge):
 
         pygame.font.init()
@@ -210,8 +213,8 @@ def main(genomes, config):
             for player in players:
                 ge[x].fitness += ball.collision(player)
 
-            # Ends the game if the fitness reaches a maximum value. Else the game continues forever as the AI wont
-            # make any mistakes.
+            # Ends the game if the fitness reaches a maximum value. Else the game continues forever as an AI wont
+            # make any mistakes at some point.
             if ge[x].fitness >= MAX_FITNESS:
                 game_alive = False
             ball.move()
@@ -227,11 +230,13 @@ def main(genomes, config):
                 pass
 
             draw_window(win, ball, bg, players, font, score)
-            # end the game as soon as the AI misses to deflect the ball
+            # ends the game as soon as the AI misses to deflect the ball
             if ball.scored() is not False:
                 game_alive = False
 
-
+# Takes the path of the config file to create a config object as well as a neat Population. It then runs the neural
+# network training by calling the main function via the populations run function. The settings in the config file
+# specify different parameters of the training like e.g. the maximum number of generations.
 def run_training(config_path):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
                                 neat.DefaultStagnation, config_path)
@@ -244,12 +249,13 @@ def run_training(config_path):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-
-    # displays the best genome including the best performing neural network. A further step would be pickeling
-    # this network and including it as an AI opponent in a Pong game that can be played by a human player.
-    # As the problem that needs to be solved is quite simple, the best network might consist of only a few (~ 3) nodes.
+    # displays the best genome including the best performing neural network. A further step would be including the
+    # pickled network as an AI opponent in a Pong game that can be played by a human player.
+    # As the problem that needs to be solved is quite simple, the best network might consist of only a few (~ 4) nodes.
     winner = p.run(main, 200)
     print('\nBest genome:\n{!s}'.format(winner))
+    with open("winner.p", "wb") as file:
+        pickle.dump(winner,  file)
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
