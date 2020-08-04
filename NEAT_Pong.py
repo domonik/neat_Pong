@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 Name:         NEAT-Pong
 Beschreibung: training of an AI-Pong opponent using pythons integration of NEAT
               http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf
 Autor:        Dominik Rabsch
 Datum:        18.07..2020
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 """
 
 
@@ -207,7 +207,7 @@ def main(genomes, config):
             clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    run = False
+                    game_alive = False
 
 
             for player in players:
@@ -241,7 +241,7 @@ def run_training(config_path):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
                                 neat.DefaultStagnation, config_path)
 
-    # overrides the fitness threshold of the config file to make it accessible as a global Variable in this script.
+    # overwrites the fitness threshold of the config file to make it accessible as a global Variable in this script.
     config.fitness_threshold = MAX_FITNESS
 
     p = neat.Population(config)
@@ -249,10 +249,12 @@ def run_training(config_path):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
+    # runs the training by calling the populations run funtction that uses the main game function
+    winner = p.run(main, 200)
+    
     # displays the best genome including the best performing neural network. A further step would be including the
     # pickled network as an AI opponent in a Pong game that can be played by a human player.
     # As the problem that needs to be solved is quite simple, the best network might consist of only a few (~ 4) nodes.
-    winner = p.run(main, 200)
     print('\nBest genome:\n{!s}'.format(winner))
     with open("winner.p", "wb") as file:
         pickle.dump(winner,  file)
