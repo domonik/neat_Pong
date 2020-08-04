@@ -27,7 +27,8 @@ insertions of genes in evolutionary processes. However, for a better understandi
 recommended to read the [initial NEAT Paper](http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf).
 
 The NEAT settings that are used here are stored in the [config.txt](config.txt) file. Only the maximum Fitness threshold 
-is changed directly in the [python script](NEAT_Pong.py) via the MAX_FITNESS variable. 
+is changed directly in the [python script](NEAT_Pong.py) via the MAX_FITNESS variable.
+### The Pong Neural Network
 #### Input nodes
 At each frame the input for the NN is the x and y position of the Ball in pixels as well as the current position of the 
 paddle. 
@@ -39,11 +40,11 @@ if it is above 0.5 it is moved up. In between the paddle stays at its current he
 
 ####  Fitness
 For training it is necessary to create a fitness function that represents how well the neural network performs in its 
-specific task. Here the task is quite simple as it is only necessary to decide whether it is an good idea to move the
+specific task. Here, the task is quite simple as it is only necessary to decide whether it is an good idea to move the
 pong paddle either up or down at every frame. Therefore a specified parameter is added to the fitness if the AI 
 successfully deflects a ball (LEARNING_PARAM1) or holds the paddle at the same height as the ball (LEARNING_PARAM2). 
 As deflecting the ball is much more important than holding the paddle at the same height, it is a good idea to set the 
-LEARNING_PARAM1 much higher than the other parameter. Additionally, the second parameter is added every frame whilst 
+LEARNING_PARAM1 much higher than the other parameter. Additionally, the second parameter is added every frame, whilst 
 the deflection parameter can only be added at the frame where the ball is deflected. 
 
 
@@ -63,9 +64,9 @@ The game and training parameters can be changed by editing the following global 
 
 Here it is possible to play around with the parameters and check how they influence the time that is necessary to
 produce an unbeatable AI opponent. For example it is possible to set the reward for holding the paddle at the same 
-height as the ball to zero, which will negatively influence the mean training time. 
+height as the ball to zero, which might negatively influence the mean training time. 
 
-The output of the program is a pickled neural network that can be included in a real pong game. This network is 
+The output of the program is a pickled neural network that can be included in a pygame pong game. This network is 
 stored in the [winner.p](winner.p) file.
 
 
