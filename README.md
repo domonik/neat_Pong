@@ -1,5 +1,18 @@
 # NEAT-Pong
 
+## Setup
+Download the code using the following command:
+```
+$ git clone  https://github.com/domonik/neat_Pong
+```
+
+
+The dependencies can be installed using:
+ 
+```
+$ pip install -r "requirements.txt"
+```
+
 
 ## Basic Idea
 ### NEAT
@@ -34,18 +47,6 @@ LEARNING_PARAM1 much higher than the other parameter. Additionally, the second p
 the deflection parameter can only be added at the frame where the ball is deflected. 
 
 
-## Setup
-Download the code using the following command:
-```
-$ git clone  https://github.com/domonik/neat_Pong
-```
-
-
-The dependencies can be installed using:
- 
-```
-$ pip install -r "requirements.txt"
-```
 
 ## Training
 
